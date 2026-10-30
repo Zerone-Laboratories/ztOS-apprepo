@@ -1,0 +1,13 @@
+{
+  "name": "ztos-app-submit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The ztOS store's submission relay: authors, Discord moderators, the ledger",
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "wrangler": "^4.152.0"
+  }
+}

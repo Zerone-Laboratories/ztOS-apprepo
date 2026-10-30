@@ -1,0 +1,4 @@
+# The zrn-sdk CI uses to build and sign (zrn, the .zexec format, libzrnui).
+# Changing it is a reviewed change to this repository.
+repo = "https://github.com/Zerone-Laboratories/zrn-sdk"
+commit = "7ebd291a3c5cac5692d35e59147b26bf10d73c5a"

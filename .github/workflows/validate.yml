@@ -1,0 +1,31 @@
+# Checks the ledger and the store's own tools on every pull request and push.
+# Submissions do not come as pull requests (they come through Discord); this
+# guards changes to the tools and anything the bot writes.
+# Before going live: pin every action to a full commit SHA.
+name: validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  ledger:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: zrn-sdk at sdk.lock
+        run: |
+          repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)
+          commit=$(sed -n 's/^commit = "\([0-9a-f]\{40\}\)"/\1/p' sdk.lock)
+          git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
+          test "$(git -C sdk rev-parse HEAD)" = "$commit"
+          echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
+      - run: pip install cryptography
+      - run: python3 tools/store.py validate
+      - run: python3 tools/test_store.py
