@@ -1,0 +1,23 @@
+# ztos-app-submit: the ztOS store's submission relay (see README.md). Not
+# deployed yet. Secrets go in with `wrangler secret put`, never in this file.
+name = "ztos-app-submit"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+preview_urls = false
+
+[vars]
+STORE_REPO = "Zerone-Laboratories/ztOS-apprepo"
+STORE_BRANCH = "main"
+# the bot's commits: CI publishes only releases whose ledger file it last changed
+BOT_NAME = "ztOS Apps"
+BOT_EMAIL = "apps-bot@ztos.online"
+ALLOWED_ORIGINS = "https://ztos.online,https://apps.ztos.online,http://localhost:8000"
+# #ztos-app-submissions (a forum channel) on the ztOS Mobile Discord: fill in once it exists
+FORUM_CHANNEL = "1566162773287641148"
+
+# five entries a minute from one address
+[[ratelimits]]
+name = "SUBMIT_LIMIT"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }

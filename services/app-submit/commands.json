@@ -1,0 +1,21 @@
+[
+  {
+    "name": "submit-app",
+    "description": "Send a ztOS app (a commit of a public GitHub repository) for review",
+    "options": [
+      { "type": 3, "name": "repo", "description": "https://github.com/OWNER/REPO", "required": true },
+      { "type": 3, "name": "commit", "description": "the full 40-digit commit SHA to build", "required": true },
+      { "type": 3, "name": "subdir", "description": "the app's folder in the repository, if not the top", "required": false }
+    ]
+  },
+  {
+    "name": "revoke-app",
+    "description": "Moderators: take a release out of the ztOS store",
+    "default_member_permissions": "17179869184",
+    "options": [
+      { "type": 3, "name": "id", "description": "the app id", "required": true },
+      { "type": 3, "name": "version", "description": "the version to revoke", "required": true },
+      { "type": 3, "name": "reason", "description": "why (shown to the author and on phones)", "required": true }
+    ]
+  }
+]

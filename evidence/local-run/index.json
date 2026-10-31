@@ -1,0 +1,36 @@
+{
+ "apps": [
+  {
+   "author": "Zerone Laboratories",
+   "categories": [
+    "Utility"
+   ],
+   "id": "zrn-example-hello",
+   "licence": "MIT",
+   "name": "Hello",
+   "releases": [
+    {
+     "approved_at": "2026-10-30T00:00:00Z",
+     "approved_by": "discord:0",
+     "arch": "x86_64",
+     "commit": "7ebd291a3c5cac5692d35e59147b26bf10d73c5a",
+     "min_ztos": "0.1",
+     "permissions": [],
+     "sha256": "2a7060ff31af6708df0431b6236c7950cd89409cb5c01cb5f9ff282515dc610d",
+     "sig_url": "file:///tmp/tmp.YuS3P6NS5P/assets/zrn-example-hello-0.1.0/zrn-example-hello-0.1.0-x86_64.zexec.minisig",
+     "size": 5491,
+     "url": "file:///tmp/tmp.YuS3P6NS5P/assets/zrn-example-hello-0.1.0/zrn-example-hello-0.1.0-x86_64.zexec",
+     "version": "0.1.0",
+     "zrnui": "0.1"
+    }
+   ],
+   "source": "https://github.com/Zerone-Laboratories/zrn-sdk",
+   "subdir": "examples/hello-c",
+   "summary": "Hello: a libzrnui example (c)"
+  }
+ ],
+ "format": 1,
+ "generated": "2026-10-30T04:18:42Z",
+ "revoked": [],
+ "store_key": "C130E5FB50DC8D60"
+}

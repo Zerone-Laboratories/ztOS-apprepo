@@ -1,0 +1,23 @@
+# ledger/<id>.toml: one app in the ztOS store. The ztOS Apps bot writes it
+# when a moderator presses Accept (or Revoke) on Discord; nobody edits it by
+# hand. CI builds each approved release from `source` at exactly `commit`.
+#
+# STAGING SAMPLE: approved_by = "discord:0" is not a real approval. CI never
+# publishes it; `store.py --staging` does, for local tests only.
+
+id = "zrn-example-hello"
+source = "https://github.com/Zerone-Laboratories/zrn-sdk"
+subdir = "examples/hello-c"
+name = "Hello"
+author = "Zerone Laboratories"
+contact = "https://discord.gg/ztos (staging sample)"
+
+[[release]]
+version = "0.1.0"
+commit = "7ebd291a3c5cac5692d35e59147b26bf10d73c5a"
+submitted_at = "2026-10-30T00:00:00Z"
+thread = ""
+status = "approved"
+approved_by = "discord:0"
+approved_by_name = "staging sample, not a real approval"
+approved_at = "2026-10-30T00:00:00Z"

@@ -1,0 +1,40 @@
+{
+ "arch": "x86_64",
+ "file": "zrn-example-hello-0.1.0-x86_64.zexec",
+ "id": "zrn-example-hello",
+ "manifest": {
+  "arch": "x86_64",
+  "author": "Zerone Laboratories",
+  "built": {
+   "by": "zrn 0.1.0",
+   "lang": "c"
+  },
+  "categories": [
+   "Utility"
+  ],
+  "description": "",
+  "entry": "bin/zrn-example-hello",
+  "homepage": "https://github.com/Zerone-Laboratories/zrn-sdk",
+  "icon": "icon.svg",
+  "id": "zrn-example-hello",
+  "licence": "MIT",
+  "min_ztos": "0.1",
+  "name": "Hello",
+  "permissions": [],
+  "runtime": "native",
+  "source": {
+   "commit": "7ebd291a3c5cac5692d35e59147b26bf10d73c5a",
+   "repo": "https://github.com/Zerone-Laboratories/zrn-sdk"
+  },
+  "summary": "Hello: a libzrnui example (c)",
+  "version": "0.1.0",
+  "zexec": 1,
+  "zrnui": "0.1"
+ },
+ "minisig": "untrusted comment: ztOS store signature\nRURgjdxQ++UwwWaLkZvd2x4X7/CHqOrB2lkUjHNy4vRWuNAhhMyHfk4TvmZn4g4FWsijZDCY8EsqKxQvysIoh14W74Sh6Tgtygg=\ntrusted comment: zexec id=zrn-example-hello version=0.1.0 arch=x86_64 sha256=2a7060ff31af6708df0431b6236c7950cd89409cb5c01cb5f9ff282515dc610d\nlWr+iJkM4GXfOTtNNKYFQodg0z4rm6kQ63HiKEm01ApWEmsR2G5+XLUlnK8e6QjHG+p+Duos/YsQDxaZtKxNBg==\n",
+ "published_at": "2026-10-30T04:18:42Z",
+ "sha256": "2a7060ff31af6708df0431b6236c7950cd89409cb5c01cb5f9ff282515dc610d",
+ "size": 5491,
+ "tag": "zrn-example-hello-0.1.0",
+ "version": "0.1.0"
+}

@@ -1,0 +1,151 @@
+# Builds, signs and lists approved apps. Started by the ztOS Apps bot when a
+# moderator accepts or revokes on Discord (repository_dispatch), by hand, and
+# nightly to catch anything missed.
+#
+#   plan     approved releases in ledger/ with nothing published yet
+#   build    one job per release, on arm64 (the phone's CPU): fetches the app at
+#            its pinned SHA and runs `zrn pack --no-sign`. It runs the app's own
+#            build, so it gets NO secrets and a read-only token it does not keep.
+#   publish  the only job with the store key (environment "store-signing"): checks
+#            each package against the ledger, signs it, makes the release, and
+#            regenerates index.json on the store-index branch. It never runs
+#            anything from a package.
+#
+# Before going live: pin every action to a full commit SHA; give the
+# "store-signing" environment the secret ZRN_STORE_KEY (a minisign secret key,
+# see keys/README.md) and, if wanted, required reviewers.
+name: publish
+on:
+  repository_dispatch:
+    types: [app-approved, app-revoked]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+concurrency:
+  group: publish
+  cancel-in-progress: false
+permissions: {}
+env:
+  BOT_EMAIL: apps-bot@ztos.online
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      builds: ${{ steps.plan.outputs.builds }}
+      any: ${{ steps.plan.outputs.any }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        continue-on-error: true   # absent before the first release
+        with:
+          ref: store-index
+          path: index
+          persist-credentials: false
+      - name: zrn-sdk at sdk.lock
+        run: |
+          repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)
+          commit=$(sed -n 's/^commit = "\([0-9a-f]\{40\}\)"/\1/p' sdk.lock)
+          git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
+          echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
+      - id: plan
+        run: mkdir -p index && python3 tools/store.py plan --index-tree index --github-output
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.any == 'true'
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.builds) }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false   # no token left on disk for the app's build to find
+      - name: toolchain
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -yq build-essential pkg-config libwayland-dev libegl-dev libgles-dev \
+            libgbm-dev libfreetype-dev libharfbuzz-dev libfontconfig-dev libpng-dev libxkbcommon-dev cargo
+      - name: zrn-sdk at sdk.lock
+        run: |
+          repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)
+          commit=$(sed -n 's/^commit = "\([0-9a-f]\{40\}\)"/\1/p' sdk.lock)
+          git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
+          make -C sdk/libzrnui -j4
+          echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
+      - name: build ${{ matrix.id }} ${{ matrix.version }} at ${{ matrix.commit }}
+        run: python3 tools/store.py build --id "${{ matrix.id }}" --version "${{ matrix.version }}" --out out
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ matrix.id }}-${{ matrix.version }}
+          path: out/*.zexec
+          if-no-files-found: error
+
+  publish:
+    needs: [plan, build]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-24.04
+    environment: store-signing
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0   # who last changed each ledger file is checked
+      - name: the store-index branch
+        run: |
+          if git fetch -q origin store-index; then git worktree add -q index FETCH_HEAD
+          else git worktree add -q --detach index && git -C index checkout -q --orphan store-index && git -C index rm -rq . || true; fi
+      - name: zrn-sdk at sdk.lock (its Python tools only; nothing is built here)
+        run: |
+          repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)
+          commit=$(sed -n 's/^commit = "\([0-9a-f]\{40\}\)"/\1/p' sdk.lock)
+          git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
+          echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
+          pip install cryptography
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: artifacts
+      - name: the store key
+        env:
+          ZRN_STORE_KEY: ${{ secrets.ZRN_STORE_KEY }}
+        run: |
+          umask 077
+          printf '%s\n' "$ZRN_STORE_KEY" > "$RUNNER_TEMP/store.key"
+      - name: sign and record
+        run: |
+          mkdir -p artifacts upload
+          python3 tools/store.py publish --artifacts artifacts --index-tree index --assets-out upload \
+            --key "$RUNNER_TEMP/store.key" --require-bot-email "$BOT_EMAIL"
+      - name: releases (assets are never replaced)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for dir in upload/*/; do
+            [ -d "$dir" ] || continue
+            tag=$(basename "$dir")
+            gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "$tag" \
+              --notes "Built by CI from the commit approved in ledger/. Verify with the store key."
+            gh release upload "$tag" "$dir"*
+          done
+      # only after the assets are up: an index never names a file that is not there
+      - name: index
+        run: |
+          python3 tools/store.py index --index-tree index --key "$RUNNER_TEMP/store.key" \
+            --base-url "https://github.com/${{ github.repository }}/releases/download"
+      - name: forget the key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/store.key"
+      - name: push the index
+        run: |
+          cd index
+          git add -A
+          git -c user.name="ztOS store CI" -c user.email="$BOT_EMAIL" commit -qm "index: $(date -u +%FT%TZ)" || exit 0
+          git push -q origin HEAD:store-index

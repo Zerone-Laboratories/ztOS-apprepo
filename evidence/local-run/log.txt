@@ -1,0 +1,27 @@
+# 2026-10-30T04:18:37Z on x86_64
+$ zrn keygen (a throwaway test store key)
+key C130E5FB50DC8D60
+  secret: /tmp/tmp.YuS3P6NS5P/store.key (keep it private, never commit it)
+  public: /tmp/tmp.YuS3P6NS5P/store.pub
+$ store.py validate
+warning: zrn-example-hello.toml: release 1 (0.1.0): a staging approval (discord:0): never published by CI; submit it on Discord to approve it for real
+1 ledger files, 0 with errors
+$ store.py plan
+[{"id": "zrn-example-hello", "version": "0.1.0", "commit": "7ebd291a3c5cac5692d35e59147b26bf10d73c5a", "source": "https://github.com/Zerone-Laboratories/zrn-sdk", "subdir": "examples/hello-c"}]
+$ store.py build (at the pinned SHA, twice: the same bytes)
+{"id": "zrn-example-hello", "version": "0.1.0", "commit": "7ebd291a3c5cac5692d35e59147b26bf10d73c5a", "package": "/tmp/tmp.YuS3P6NS5P/artifacts/zrn-example-hello-0.1.0-x86_64.zexec", "sha256": "2a7060ff31af6708df0431b6236c7950cd89409cb5c01cb5f9ff282515dc610d", "arch": "x86_64"}
+{"id": "zrn-example-hello", "version": "0.1.0", "commit": "7ebd291a3c5cac5692d35e59147b26bf10d73c5a", "package": "/tmp/tmp.YuS3P6NS5P/again/zrn-example-hello-0.1.0-x86_64.zexec", "sha256": "2a7060ff31af6708df0431b6236c7950cd89409cb5c01cb5f9ff282515dc610d", "arch": "x86_64"}
+2a7060ff31af6708df0431b6236c7950cd89409cb5c01cb5f9ff282515dc610d  artifacts/zrn-example-hello-0.1.0-x86_64.zexec
+2a7060ff31af6708df0431b6236c7950cd89409cb5c01cb5f9ff282515dc610d  again/zrn-example-hello-0.1.0-x86_64.zexec
+$ store.py publish (x86_64 allowed: this laptop has no aarch64 compiler)
+publish: signed zrn-example-hello-0.1.0-x86_64.zexec (2a7060ff31af6708...)
+{"published": ["zrn-example-hello-0.1.0"]}
+$ store.py index
+index: 1 apps, 0 revoked -> /tmp/tmp.YuS3P6NS5P/tree/index.json
+$ store.py check-index (as a client, with the store key)
+good: zrn-example-hello 0.1.0 x86_64 (2a7060ff31af6708...)
+$ check-index with another key (must refuse)
+store.py: index.json.minisig: signed by key C130E5FB50DC8D60, which is not trusted here (trusted: 41E52D98ACA87152)
+(refused, exit 1)
+$ plan again (nothing left to build)
+[]
