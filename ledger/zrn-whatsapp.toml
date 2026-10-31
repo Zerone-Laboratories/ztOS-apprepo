@@ -1,0 +1,19 @@
+# ledger/<id>.toml: one app in the ztOS store, written by the ztOS Apps bot
+# when a moderator accepts or revokes on Discord. Do not edit by hand.
+
+id = "zrn-whatsapp"
+source = "https://github.com/Zerone-Laboratories/zrn-whatsapp"
+subdir = ""
+name = "WhatsApp"
+author = "Zerone Laboratories"
+contact = "ztOS Mobile Discord"
+
+[[release]]
+version = "0.1.0"
+commit = "8951b0cafbd3402d9a2ffe6c0fc4c6a8fc2d3bad"
+submitted_at = "2026-10-31T20:30:51Z"
+thread = "1566187724468133931"
+status = "approved"
+approved_by = "discord:1436381356304240772"
+approved_by_name = "zerone.brianstorm"
+approved_at = "2026-10-31T20:32:16Z"
