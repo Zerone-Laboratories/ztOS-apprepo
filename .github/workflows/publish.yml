@@ -72,7 +72,8 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -yq build-essential pkg-config libwayland-dev libegl-dev libgles-dev \
-            libgbm-dev libfreetype-dev libharfbuzz-dev libfontconfig-dev libpng-dev libxkbcommon-dev cargo
+            libgbm-dev libfreetype-dev libharfbuzz-dev libfontconfig-dev libpng-dev libxkbcommon-dev cargo \
+            libsodium-dev libssl-dev libsqlite3-dev zlib1g-dev libcurl4-openssl-dev libsystemd-dev
       - name: zrn-sdk at sdk.lock
         run: |
           repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)
