@@ -25,9 +25,8 @@ a binary, and nobody merges a pull request to add your app.
    commit you submit is pushed. Everything needed to build must be in that
    commit: no downloads during the build other than your language's normal
    package registry (Rust crates).
-5. The licence lets the store redistribute your app. Because libzrnui is
-   GPL-2.0-or-later today, a native app must be under a GPL-compatible
-   licence (see the SDK's DESIGN.md, Round 2).
+5. The licence lets the store redistribute your app. libzrnui and its bindings
+   are LGPL-2.1-or-later, so an app under any licence can link them.
 
 ## Submitting
 
