@@ -14,7 +14,7 @@ BOT_NAME = "ztOS Apps"
 BOT_EMAIL = "apps-bot@ztos.online"
 ALLOWED_ORIGINS = "https://ztos.online,https://apps.ztos.online,http://localhost:8000"
 # #ztos-app-submissions (a forum channel) on the ztOS Mobile Discord: fill in once it exists
-FORUM_CHANNEL = ""
+FORUM_CHANNEL = "1566162773287641148"
 
 # five entries a minute from one address
 [[ratelimits]]
