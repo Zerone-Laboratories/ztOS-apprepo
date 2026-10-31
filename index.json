@@ -29,6 +29,26 @@
      "url": "https://github.com/Zerone-Laboratories/ztOS-apprepo/releases/download/zrn-whatsapp-0.1.0/zrn-whatsapp-0.1.0-aarch64.zexec",
      "version": "0.1.0",
      "zrnui": "0.1"
+    },
+    {
+     "approved_at": "2026-10-31T21:06:24Z",
+     "approved_by": "discord:1436381356304240772",
+     "arch": "aarch64",
+     "commit": "78672d5d26bc62722dea12a2562c183b9d67561e",
+     "min_ztos": "0.2.1",
+     "permissions": [
+      "network",
+      "notifications",
+      "background",
+      "contacts",
+      "messages"
+     ],
+     "sha256": "d6684dd4e7aabad73a9925d33d33c3b2c4d97eedf67eb76c1402481a55470215",
+     "sig_url": "https://github.com/Zerone-Laboratories/ztOS-apprepo/releases/download/zrn-whatsapp-0.1.1/zrn-whatsapp-0.1.1-aarch64.zexec.minisig",
+     "size": 10214441,
+     "url": "https://github.com/Zerone-Laboratories/ztOS-apprepo/releases/download/zrn-whatsapp-0.1.1/zrn-whatsapp-0.1.1-aarch64.zexec",
+     "version": "0.1.1",
+     "zrnui": "0.1"
     }
    ],
    "source": "https://github.com/Zerone-Laboratories/zrn-whatsapp",
@@ -37,7 +57,7 @@
   }
  ],
  "format": 1,
- "generated": "2026-10-31T20:35:07Z",
+ "generated": "2026-10-31T21:10:52Z",
  "revoked": [],
  "store_key": "EE32A201245A015F"
 }
