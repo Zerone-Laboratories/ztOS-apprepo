@@ -3,8 +3,9 @@
 # nightly to catch anything missed.
 #
 #   plan     approved releases in ledger/ with nothing published yet
-#   build    one job per release, on arm64 (the phone's CPU): fetches the app at
-#            its pinned SHA and runs `zrn pack --no-sign`. It runs the app's own
+#   build    one job per release, on arm64 (the phone's CPU), inside Arch Linux ARM
+#            with the image's packages: fetches the app at its pinned SHA, runs
+#            `zrn pack --no-sign`, and fails if it links what the image lacks. It runs the app's own
 #            build, so it gets NO secrets and a read-only token it does not keep.
 #   publish  the only job with the store key (environment "store-signing"): checks
 #            each package against the ledger, signs it, makes the release, and
@@ -19,6 +20,16 @@ on:
   repository_dispatch:
     types: [app-approved, app-revoked]
   workflow_dispatch:
+    inputs:   # a trial: build one commit as CI would, publish nothing
+      trial_id:
+        description: "Trial build: app id. Empty: the normal run."
+        default: ""
+      trial_source:
+        default: ""
+      trial_version:
+        default: ""
+      trial_commit:
+        default: ""
   schedule:
     - cron: "17 3 * * *"
 concurrency:
@@ -52,7 +63,17 @@ jobs:
           git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
           echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
       - id: plan
-        run: mkdir -p index && python3 tools/store.py plan --index-tree index --github-output
+        env:
+          T_ID: ${{ inputs.trial_id }}
+          T_VERSION: ${{ inputs.trial_version }}
+          T_COMMIT: ${{ inputs.trial_commit }}
+        run: |
+          if [ -n "$T_ID" ]; then
+            echo "builds=[{\"id\":\"$T_ID\",\"version\":\"$T_VERSION\",\"commit\":\"$T_COMMIT\"}]" >> "$GITHUB_OUTPUT"
+            echo "any=true" >> "$GITHUB_OUTPUT"
+          else
+            mkdir -p index && python3 tools/store.py plan --index-tree index --github-output
+          fi
 
   build:
     needs: plan
@@ -68,30 +89,41 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false   # no token left on disk for the app's build to find
-      - name: toolchain
+      - name: Arch Linux ARM, the base of the ztOS image
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -yq build-essential pkg-config libwayland-dev libegl-dev libgles-dev \
-            libgbm-dev libfreetype-dev libharfbuzz-dev libfontconfig-dev libpng-dev libxkbcommon-dev cargo \
-            libsodium-dev libssl-dev libsqlite3-dev zlib1g-dev libcurl4-openssl-dev libsystemd-dev
-      - name: zrn-sdk at sdk.lock
+          base=http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
+          curl -fsSL -o alarm.tar.gz "$base"
+          curl -fsSL "$base.md5" | awk '{print $1"  alarm.tar.gz"}' | md5sum -c -
+          docker import alarm.tar.gz ztos-build
+      - name: a trial's stand-in ledger entry (this job's copy only)
+        if: inputs.trial_id != ''
+        env:
+          T_ID: ${{ inputs.trial_id }}
+          T_SOURCE: ${{ inputs.trial_source }}
+          T_VERSION: ${{ inputs.trial_version }}
+          T_COMMIT: ${{ inputs.trial_commit }}
         run: |
-          repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)
-          commit=$(sed -n 's/^commit = "\([0-9a-f]\{40\}\)"/\1/p' sdk.lock)
-          git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
-          make -C sdk/libzrnui -j4
-          echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
-      - name: build ${{ matrix.id }} ${{ matrix.version }} at ${{ matrix.commit }}
-        run: python3 tools/store.py build --id "${{ matrix.id }}" --version "${{ matrix.version }}" --out out
+          printf 'id = "%s"\nsource = "%s"\nsubdir = ""\n[[release]]\nversion = "%s"\ncommit = "%s"\nstatus = "approved"\napproved_by = "discord:0"\napproved_at = "2026-01-01T00:00:00Z"\n' \
+            "$T_ID" "$T_SOURCE" "$T_VERSION" "$T_COMMIT" > "ledger/$T_ID.toml"
+      - name: build ${{ matrix.id }} ${{ matrix.version }} at ${{ matrix.commit }}, and check what it links
+        env:
+          APP_ID: ${{ matrix.id }}
+          APP_VERSION: ${{ matrix.version }}
+        run: |
+          mkdir -p out
+          docker run --rm -v "$PWD:/w" -w /w ztos-build /bin/sh ci/build-in-arch.sh "$APP_ID" "$APP_VERSION"
+          sudo chown -R "$(id -u)" out
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ matrix.id }}-${{ matrix.version }}
-          path: out/*.zexec
+          path: |
+            out/*.zexec
+            out/packages-built-against.txt
           if-no-files-found: error
 
   publish:
     needs: [plan, build]
-    if: always() && needs.plan.result == 'success'
+    if: always() && needs.plan.result == 'success' && inputs.trial_id == ''
     runs-on: ubuntu-24.04
     environment: store-signing
     permissions:
