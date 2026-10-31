@@ -8,8 +8,8 @@ a binary, and nobody merges a pull request to add your app.
 ## Before you submit
 
 1. Your app builds and packs with the SDK: `zrn build && zrn pack && zrn verify dist/*.zexec`.
-2. It looks right in both styles: `zrn render out.png` and
-   `zrn render --style metro out.png`.
+2. It looks right in both of ztCoolStyle's styles, Metro and DotMatrix:
+   `zrn render --style metro out.png` and `zrn render --style dotmatrix out.png`.
 3. `zrnapp.toml` is complete:
    - `id`: reverse-DNS you control, at least three parts, lower case
      (`io.github.alice.notes`). It never changes. `zrn-` ids are reserved for
@@ -59,7 +59,7 @@ nothing to what is already listed.
 - Code that is obfuscated, downloads and runs code, or is not the app the
   name and summary describe.
 - A build that does not work from a clean checkout of the commit.
-- Breaking the zrnCoolStyle rules badly (unreadable text, fake system UI).
+- Breaking the ztCoolStyle rules badly (unreadable text, fake system UI).
 
 ## Revocation
 
