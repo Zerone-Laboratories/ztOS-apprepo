@@ -36,10 +36,10 @@ jobs:
       builds: ${{ steps.plan.outputs.builds }}
       any: ${{ steps.plan.outputs.any }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         continue-on-error: true   # absent before the first release
         with:
           ref: store-index
@@ -65,7 +65,7 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.plan.outputs.builds) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false   # no token left on disk for the app's build to find
       - name: toolchain
@@ -82,7 +82,7 @@ jobs:
           echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
       - name: build ${{ matrix.id }} ${{ matrix.version }} at ${{ matrix.commit }}
         run: python3 tools/store.py build --id "${{ matrix.id }}" --version "${{ matrix.version }}" --out out
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ matrix.id }}-${{ matrix.version }}
           path: out/*.zexec
@@ -96,7 +96,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0   # who last changed each ledger file is checked
       - name: the store-index branch
@@ -110,7 +110,7 @@ jobs:
           git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
           echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
           pip install cryptography
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: artifacts
       - name: the store key
