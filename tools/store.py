@@ -277,6 +277,13 @@ def cmd_publish(args):
         meta = {"id": m["id"], "version": m["version"], "arch": m["arch"], "sha256": sha,
                 "size": pkg.stat().st_size, "tag": tag, "file": name, "minisig": sig_text,
                 "manifest": m, "published_at": now()}
+        # its picture travels in the signed index, so the store can show it before any download
+        if m.get("icon"):
+            import base64, zipfile
+            with zipfile.ZipFile(pkg) as z:
+                raw = z.read(m["icon"])
+            if len(raw) <= 64 * 1024:
+                meta["icon_b64"] = base64.b64encode(raw).decode()
         meta_path.parent.mkdir(parents=True, exist_ok=True)
         meta_path.write_text(json.dumps(meta, indent=1, sort_keys=True) + "\n")
         done.append(tag)
@@ -316,11 +323,14 @@ def cmd_index(args):
         if not releases:
             continue
         latest = max(releases, key=lambda x: tuple(int(p) for p in x["version"].split("-")[0].split(".")))
-        meta = json.loads(published(tree, data["id"], latest["version"])[0].read_text())["manifest"]
+        whole = json.loads(published(tree, data["id"], latest["version"])[0].read_text())
+        meta = whole["manifest"]
+        icon_b64 = whole.get("icon_b64")
         apps.append({"id": data["id"], "name": meta.get("name", data.get("name", "")),
                      "summary": meta.get("summary", ""), "author": meta.get("author", data.get("author", "")),
                      "licence": meta.get("licence", ""), "categories": meta.get("categories", []),
-                     "source": data["source"], "subdir": data.get("subdir", ""), "releases": releases})
+                     "source": data["source"], "subdir": data.get("subdir", ""), "releases": releases,
+                     **({"icon_b64": icon_b64} if icon_b64 else {})})
     index = {"format": 1, "generated": now(), "store_key": key.public.id_hex, "apps": apps, "revoked": revoked}
     tree.mkdir(parents=True, exist_ok=True)
     path = tree / "index.json"
