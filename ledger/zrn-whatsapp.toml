@@ -37,3 +37,13 @@ status = "approved"
 approved_by = "discord:1436381356304240772"
 approved_by_name = "zerone.brianstorm"
 approved_at = "2026-11-01T05:03:36Z"
+
+[[release]]
+version = "0.1.4"
+commit = "ff01945dc539a853bffa26486259969f3663ac3f"
+submitted_at = "2026-11-01T06:32:20Z"
+thread = "1566339091543367844"
+status = "approved"
+approved_by = "discord:1436381356304240772"
+approved_by_name = "zerone.brianstorm"
+approved_at = "2026-11-01T06:35:36Z"
