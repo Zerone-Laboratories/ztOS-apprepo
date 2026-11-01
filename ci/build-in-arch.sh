@@ -9,7 +9,12 @@ pacman-key --init >/dev/null
 pacman-key --populate archlinuxarm >/dev/null
 pacman -Rdd --noconfirm linux-aarch64 >/dev/null 2>&1 || true	# no boot files in a container
 grep -v '^#' ci/ztos-packages.txt > /tmp/want
-pacman -Syu --noconfirm --needed - < /tmp/want >/dev/null
+# Mirrors drop files now and then (this failed a 0.1.3 build): try again before giving up.
+for try in 1 2 3 4; do
+	pacman -Syu --noconfirm --needed - < /tmp/want >/dev/null && break
+	[ "$try" = 4 ] && exit 1
+	sleep $((try * 30))
+done
 pacman -S --noconfirm --needed rust pkgconf >/dev/null	# builds Rust apps; not linked at run time
 pacman -Q > out/packages-built-against.txt
 repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)

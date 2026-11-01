@@ -182,3 +182,9 @@ jobs:
           git add -A
           git -c user.name="ztOS store CI" -c user.email="$BOT_EMAIL" commit -qm "index: $(date -u +%FT%TZ)" || exit 0
           git push -q origin HEAD:store-index
+      # what built is published; what did not must not look fine
+      - name: a build failed
+        if: needs.build.result == 'failure'
+        run: |
+          echo "::error::A build failed: that release is not in the store. See the build job."
+          exit 1
