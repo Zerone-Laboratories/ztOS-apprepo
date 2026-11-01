@@ -205,7 +205,7 @@ def cmd_build(args):
     out = Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ, ZRN_SOURCE_REPO=source, ZRN_SOURCE_COMMIT=sha)
-    p = subprocess.run([sys.executable, str(SDK / "tools" / "zrn"), "pack", "--no-sign", "--json",
+    p = subprocess.run([sys.executable, str(SDK / "tools" / "zrn"), "pack", "--no-sign", "--bundle-zrnui", "--json",
                         "-C", str(app), "--out", str(out)], capture_output=True, text=True, env=env)
     try:
         info = json.loads(p.stdout)
