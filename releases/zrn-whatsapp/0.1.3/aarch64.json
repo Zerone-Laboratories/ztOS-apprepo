@@ -1,0 +1,50 @@
+{
+ "arch": "aarch64",
+ "file": "zrn-whatsapp-0.1.3-aarch64.zexec",
+ "id": "zrn-whatsapp",
+ "manifest": {
+  "arch": "aarch64",
+  "author": "Zerone Laboratories",
+  "built": {
+   "by": "zrn 0.1.0",
+   "lang": "cpp"
+  },
+  "bundles": [
+   "zrnui"
+  ],
+  "categories": [
+   "Network",
+   "InstantMessaging"
+  ],
+  "description": "",
+  "entry": "bin/zrn-whatsapp",
+  "homepage": "https://github.com/Zerone-Laboratories/zrn-whatsapp",
+  "icon": "icon.svg",
+  "id": "zrn-whatsapp",
+  "licence": "GPL-2.0-or-later",
+  "min_ztos": "0.2.1",
+  "name": "WhatsApp",
+  "permissions": [
+   "network",
+   "notifications",
+   "background",
+   "contacts",
+   "messages"
+  ],
+  "runtime": "native",
+  "source": {
+   "commit": "909767b419624cd04333b34598ea87a54a0caeb1",
+   "repo": "https://github.com/Zerone-Laboratories/zrn-whatsapp"
+  },
+  "summary": "An unofficial WhatsApp client for ztOS, as a linked device",
+  "version": "0.1.3",
+  "zexec": 1,
+  "zrnui": "0.1"
+ },
+ "minisig": "untrusted comment: ztOS store signature\nRURfAVokAaIy7uOegW5KKgEGPaENYfMyTmb2tTLlBMoLDN73Ou5ZC4aYBc6Bx/DloQk8eh85ZGrcVqiIG2xzmogmuh9p79Hkyw0=\ntrusted comment: zexec id=zrn-whatsapp version=0.1.3 arch=aarch64 sha256=57b91400e8a85f9d7be3a04008a81b6effa685293863e1eb34db593b56290fa5\nQD/0uvyuBxdOk88kra4W64EwnRkbJdX2Wusr73Knsz2h84u8N/bwjHIazii4e5XjTcNXfdiwEV08BaJTLpHPBA==\n",
+ "published_at": "2026-11-01T05:45:11Z",
+ "sha256": "57b91400e8a85f9d7be3a04008a81b6effa685293863e1eb34db593b56290fa5",
+ "size": 10623049,
+ "tag": "zrn-whatsapp-0.1.3",
+ "version": "0.1.3"
+}
