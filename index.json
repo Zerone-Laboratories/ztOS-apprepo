@@ -6,6 +6,7 @@
     "Network",
     "InstantMessaging"
    ],
+   "icon_b64": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4Ij4KICA8cmVjdCB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIGZpbGw9IiMyNUQzNjYiLz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5IDkpIHNjYWxlKDEuMjUpIj48cGF0aCBmaWxsPSIjZmZmZmZmIiBkPSJNMTcuNDcyIDE0LjM4MmMtLjI5Ny0uMTQ5LTEuNzU4LS44NjctMi4wMy0uOTY3LS4yNzMtLjA5OS0uNDcxLS4xNDgtLjY3LjE1LS4xOTcuMjk3LS43NjcuOTY2LS45NCAxLjE2NC0uMTczLjE5OS0uMzQ3LjIyMy0uNjQ0LjA3NS0uMjk3LS4xNS0xLjI1NS0uNDYzLTIuMzktMS40NzUtLjg4My0uNzg4LTEuNDgtMS43NjEtMS42NTMtMi4wNTktLjE3My0uMjk3LS4wMTgtLjQ1OC4xMy0uNjA2LjEzNC0uMTMzLjI5OC0uMzQ3LjQ0Ni0uNTIuMTQ5LS4xNzQuMTk4LS4yOTguMjk4LS40OTcuMDk5LS4xOTguMDUtLjM3MS0uMDI1LS41Mi0uMDc1LS4xNDktLjY2OS0xLjYxMi0uOTE2LTIuMjA3LS4yNDItLjU3OS0uNDg3LS41LS42NjktLjUxLS4xNzMtLjAwOC0uMzcxLS4wMS0uNTctLjAxLS4xOTggMC0uNTIuMDc0LS43OTIuMzcyLS4yNzIuMjk3LTEuMDQgMS4wMTYtMS4wNCAyLjQ3OSAwIDEuNDYyIDEuMDY1IDIuODc1IDEuMjEzIDMuMDc0LjE0OS4xOTggMi4wOTYgMy4yIDUuMDc3IDQuNDg3LjcwOS4zMDYgMS4yNjIuNDg5IDEuNjk0LjYyNS43MTIuMjI3IDEuMzYuMTk1IDEuODcxLjExOC41NzEtLjA4NSAxLjc1OC0uNzE5IDIuMDA2LTEuNDEzLjI0OC0uNjk0LjI0OC0xLjI4OS4xNzMtMS40MTMtLjA3NC0uMTI0LS4yNzItLjE5OC0uNTctLjM0N20tNS40MjEgNy40MDNoLS4wMDRhOS44NyA5Ljg3IDAgMDEtNS4wMzEtMS4zNzhsLS4zNjEtLjIxNC0zLjc0MS45ODIuOTk4LTMuNjQ4LS4yMzUtLjM3NGE5Ljg2IDkuODYgMCAwMS0xLjUxLTUuMjZjLjAwMS01LjQ1IDQuNDM2LTkuODg0IDkuODg4LTkuODg0IDIuNjQgMCA1LjEyMiAxLjAzIDYuOTg4IDIuODk4YTkuODI1IDkuODI1IDAgMDEyLjg5MyA2Ljk5NGMtLjAwMyA1LjQ1LTQuNDM3IDkuODg0LTkuODg1IDkuODg0bTguNDEzLTE4LjI5N0ExMS44MTUgMTEuODE1IDAgMDAxMi4wNSAwQzUuNDk1IDAgLjE2IDUuMzM1LjE1NyAxMS44OTJjMCAyLjA5Ni41NDcgNC4xNDIgMS41ODggNS45NDVMLjA1NyAyNGw2LjMwNS0xLjY1NGExMS44ODIgMTEuODgyIDAgMDA1LjY4MyAxLjQ0OGguMDA1YzYuNTU0IDAgMTEuODktNS4zMzUgMTEuODkzLTExLjg5M2ExMS44MjEgMTEuODIxIDAgMDAtMy40OC04LjQxM1oiLz48L2c+Cjwvc3ZnPgo=",
    "id": "zrn-whatsapp",
    "licence": "GPL-2.0-or-later",
    "name": "WhatsApp",
@@ -89,6 +90,26 @@
      "url": "https://github.com/Zerone-Laboratories/ztOS-apprepo/releases/download/zrn-whatsapp-0.1.4/zrn-whatsapp-0.1.4-aarch64.zexec",
      "version": "0.1.4",
      "zrnui": "0.1"
+    },
+    {
+     "approved_at": "2026-11-01T07:30:46Z",
+     "approved_by": "discord:1436381356304240772",
+     "arch": "aarch64",
+     "commit": "3364fff2807c4da2cdc4d9af67035696ff0f86e0",
+     "min_ztos": "0.2.1",
+     "permissions": [
+      "network",
+      "notifications",
+      "background",
+      "contacts",
+      "messages"
+     ],
+     "sha256": "b19319d530a39192801c82423d0c6ecd75e6bdfe9eacb404dd65fd5708bec1a3",
+     "sig_url": "https://github.com/Zerone-Laboratories/ztOS-apprepo/releases/download/zrn-whatsapp-0.2.0/zrn-whatsapp-0.2.0-aarch64.zexec.minisig",
+     "size": 11353652,
+     "url": "https://github.com/Zerone-Laboratories/ztOS-apprepo/releases/download/zrn-whatsapp-0.2.0/zrn-whatsapp-0.2.0-aarch64.zexec",
+     "version": "0.2.0",
+     "zrnui": "0.1"
     }
    ],
    "source": "https://github.com/Zerone-Laboratories/zrn-whatsapp",
@@ -97,7 +118,7 @@
   }
  ],
  "format": 1,
- "generated": "2026-11-01T06:40:20Z",
+ "generated": "2026-11-01T07:35:39Z",
  "revoked": [],
  "store_key": "EE32A201245A015F"
 }

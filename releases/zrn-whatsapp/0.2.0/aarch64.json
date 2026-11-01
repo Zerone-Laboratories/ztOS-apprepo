@@ -1,0 +1,54 @@
+{
+ "arch": "aarch64",
+ "file": "zrn-whatsapp-0.2.0-aarch64.zexec",
+ "icon_b64": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4Ij4KICA8cmVjdCB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIGZpbGw9IiMyNUQzNjYiLz4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg5IDkpIHNjYWxlKDEuMjUpIj48cGF0aCBmaWxsPSIjZmZmZmZmIiBkPSJNMTcuNDcyIDE0LjM4MmMtLjI5Ny0uMTQ5LTEuNzU4LS44NjctMi4wMy0uOTY3LS4yNzMtLjA5OS0uNDcxLS4xNDgtLjY3LjE1LS4xOTcuMjk3LS43NjcuOTY2LS45NCAxLjE2NC0uMTczLjE5OS0uMzQ3LjIyMy0uNjQ0LjA3NS0uMjk3LS4xNS0xLjI1NS0uNDYzLTIuMzktMS40NzUtLjg4My0uNzg4LTEuNDgtMS43NjEtMS42NTMtMi4wNTktLjE3My0uMjk3LS4wMTgtLjQ1OC4xMy0uNjA2LjEzNC0uMTMzLjI5OC0uMzQ3LjQ0Ni0uNTIuMTQ5LS4xNzQuMTk4LS4yOTguMjk4LS40OTcuMDk5LS4xOTguMDUtLjM3MS0uMDI1LS41Mi0uMDc1LS4xNDktLjY2OS0xLjYxMi0uOTE2LTIuMjA3LS4yNDItLjU3OS0uNDg3LS41LS42NjktLjUxLS4xNzMtLjAwOC0uMzcxLS4wMS0uNTctLjAxLS4xOTggMC0uNTIuMDc0LS43OTIuMzcyLS4yNzIuMjk3LTEuMDQgMS4wMTYtMS4wNCAyLjQ3OSAwIDEuNDYyIDEuMDY1IDIuODc1IDEuMjEzIDMuMDc0LjE0OS4xOTggMi4wOTYgMy4yIDUuMDc3IDQuNDg3LjcwOS4zMDYgMS4yNjIuNDg5IDEuNjk0LjYyNS43MTIuMjI3IDEuMzYuMTk1IDEuODcxLjExOC41NzEtLjA4NSAxLjc1OC0uNzE5IDIuMDA2LTEuNDEzLjI0OC0uNjk0LjI0OC0xLjI4OS4xNzMtMS40MTMtLjA3NC0uMTI0LS4yNzItLjE5OC0uNTctLjM0N20tNS40MjEgNy40MDNoLS4wMDRhOS44NyA5Ljg3IDAgMDEtNS4wMzEtMS4zNzhsLS4zNjEtLjIxNC0zLjc0MS45ODIuOTk4LTMuNjQ4LS4yMzUtLjM3NGE5Ljg2IDkuODYgMCAwMS0xLjUxLTUuMjZjLjAwMS01LjQ1IDQuNDM2LTkuODg0IDkuODg4LTkuODg0IDIuNjQgMCA1LjEyMiAxLjAzIDYuOTg4IDIuODk4YTkuODI1IDkuODI1IDAgMDEyLjg5MyA2Ljk5NGMtLjAwMyA1LjQ1LTQuNDM3IDkuODg0LTkuODg1IDkuODg0bTguNDEzLTE4LjI5N0ExMS44MTUgMTEuODE1IDAgMDAxMi4wNSAwQzUuNDk1IDAgLjE2IDUuMzM1LjE1NyAxMS44OTJjMCAyLjA5Ni41NDcgNC4xNDIgMS41ODggNS45NDVMLjA1NyAyNGw2LjMwNS0xLjY1NGExMS44ODIgMTEuODgyIDAgMDA1LjY4MyAxLjQ0OGguMDA1YzYuNTU0IDAgMTEuODktNS4zMzUgMTEuODkzLTExLjg5M2ExMS44MjEgMTEuODIxIDAgMDAtMy40OC04LjQxM1oiLz48L2c+Cjwvc3ZnPgo=",
+ "id": "zrn-whatsapp",
+ "manifest": {
+  "arch": "aarch64",
+  "author": "Zerone Laboratories",
+  "built": {
+   "by": "zrn 0.1.0",
+   "lang": "cpp"
+  },
+  "bundles": [
+   "zrnui"
+  ],
+  "categories": [
+   "Network",
+   "InstantMessaging"
+  ],
+  "data_dirs": [
+   "ztwhatsapp"
+  ],
+  "description": "",
+  "entry": "bin/zrn-whatsapp",
+  "homepage": "https://github.com/Zerone-Laboratories/zrn-whatsapp",
+  "icon": "icon.svg",
+  "id": "zrn-whatsapp",
+  "licence": "GPL-2.0-or-later",
+  "min_ztos": "0.2.1",
+  "name": "WhatsApp",
+  "permissions": [
+   "network",
+   "notifications",
+   "background",
+   "contacts",
+   "messages"
+  ],
+  "runtime": "native",
+  "source": {
+   "commit": "3364fff2807c4da2cdc4d9af67035696ff0f86e0",
+   "repo": "https://github.com/Zerone-Laboratories/zrn-whatsapp"
+  },
+  "summary": "An unofficial WhatsApp client for ztOS, as a linked device",
+  "version": "0.2.0",
+  "zexec": 1,
+  "zrnui": "0.1"
+ },
+ "minisig": "untrusted comment: ztOS store signature\nRURfAVokAaIy7kJLz90eBkxhZeC6gxuz9CgZRSbzWn8Gr0xuT2hagFR2VmJLmB7FM2eR5xOBzJC0x376pa9zW1TWduZVbsjBPQA=\ntrusted comment: zexec id=zrn-whatsapp version=0.2.0 arch=aarch64 sha256=b19319d530a39192801c82423d0c6ecd75e6bdfe9eacb404dd65fd5708bec1a3\nQfIwZ6Rinem6YO341biSlh9R1HiXluu4bauY68tK5I1HgXI5c0/7r6RbkXGS94vxyfmXZ25Xbr65EVT9ajggCg==\n",
+ "published_at": "2026-11-01T07:35:35Z",
+ "sha256": "b19319d530a39192801c82423d0c6ecd75e6bdfe9eacb404dd65fd5708bec1a3",
+ "size": 11353652,
+ "tag": "zrn-whatsapp-0.2.0",
+ "version": "0.2.0"
+}
