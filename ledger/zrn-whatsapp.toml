@@ -7,10 +7,6 @@ subdir = ""
 name = "WhatsApp"
 author = "Zerone Laboratories"
 contact = "ztOS Mobile Discord"
-# From 0.3.0 the app is SDK v2 (.zexec format 2, [build] sdk = 2) with two login
-# services (zrn-ztwhatsappd, zrn-ztwhatsapp-notify). Its [[release]] is added here by
-# the bot when a moderator accepts it, as for every release; phones need the client
-# from client/ (zrn 0.3.0) to install it.
 
 [[release]]
 version = "0.1.0"
@@ -61,3 +57,13 @@ status = "approved"
 approved_by = "discord:1436381356304240772"
 approved_by_name = "zerone.brianstorm"
 approved_at = "2026-11-01T07:30:46Z"
+
+[[release]]
+version = "0.3.0"
+commit = "ae068639896a50ef1329f524896594d95a729d6a"
+submitted_at = "2026-11-21T04:58:09Z"
+thread = "1573563145799209065"
+status = "approved"
+approved_by = "discord:1436381356304240772"
+approved_by_name = "zerone.brianstorm"
+approved_at = "2026-11-21T04:59:10Z"
