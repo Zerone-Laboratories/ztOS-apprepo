@@ -4,6 +4,9 @@ ldd in this rootfs, which holds only the image's packages. Prints which package
 gives each library, for the log."""
 import json, os, subprocess, sys, tempfile, zipfile
 
+# A format 2 (SDK v2) package links zrnui and zrnapp in: the phone has neither as a library.
+STATIC_ONLY = ("libzrnui", "libzrnapp")
+
 bad = 0
 for path in sys.argv[1:]:
     with tempfile.TemporaryDirectory() as d, zipfile.ZipFile(path) as z:
@@ -18,6 +21,9 @@ for path in sys.argv[1:]:
         for line in out.splitlines():
             if "not found" in line:
                 print(f"NOT IN THE IMAGE: {line.strip()}")
+                bad += 1
+            elif m.get("zexec") == 2 and line.strip().startswith(STATIC_ONLY):
+                print(f"SDK v2 LINKS THIS STATICALLY: {line.strip()}")
                 bad += 1
             elif "=> /" in line:
                 lib = line.split("=> ")[1].split()[0]

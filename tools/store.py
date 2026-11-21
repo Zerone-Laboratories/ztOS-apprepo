@@ -10,9 +10,12 @@ its pinned commit, signing, the index, and checking it all as a client would.
     store.py index --index-tree DIR --key K --base-url URL
     store.py check-index --index URL|FILE --pubkey store.pub     what a client must do
 
-Needs the zrn tools: ZRN_SDK names a zrn-sdk checkout (sdk.lock says which
-commit CI uses). Only `build` ever runs code from an app, and it runs with no
-secrets; `publish` reads packages and never executes them.
+The package format (.zexec 1 and 2), signatures and the phone's client are in
+client/zrnlib, one copy for both sides. `build` needs a zrn-sdk checkout for the
+app's SDK (sdk.lock pins both): ZRN_SDK for SDK v1 apps (its `zrn pack`),
+ZRN_SDK2 for SDK v2 apps ([build] sdk = 2: CMake, zrnui and zrnapp linked in
+statically, packed here as format 2). Only `build` ever runs code from an app,
+and it runs with no secrets; `publish` reads packages and never executes them.
 """
 import argparse
 import datetime
@@ -30,12 +33,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = Path(os.environ.get("STORE_LEDGER") or ROOT / "ledger")
-SDK = Path(os.environ.get("ZRN_SDK") or ROOT.parent / "zrn-sdk")
-sys.path.insert(0, str(SDK / "tools"))
-try:
-    from zrnlib import sign, zexec  # noqa: E402
-except ImportError:
-    sys.exit(f"store.py: the zrn tools are not at {SDK}/tools; set ZRN_SDK to a zrn-sdk checkout (see sdk.lock)")
+SDK = Path(os.environ.get("ZRN_SDK") or ROOT.parent / "zrn-sdk")      # v1 apps
+SDK2 = Path(os.environ.get("ZRN_SDK2") or ROOT.parent / "zrn-sdk")    # v2 apps
+sys.path.insert(0, str(ROOT / "client"))
+from zrnlib import sign, zexec  # noqa: E402
 
 REPO_RE = re.compile(r"^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
@@ -204,6 +205,12 @@ def cmd_build(args):
                          f"the ledger {args.id} {args.version}")
     out = Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
+    if tomllib.loads(toml.read_text()).get("build", {}).get("sdk") == 2:
+        info = build_v2(app, out, source, sha)
+        print(json.dumps({"id": args.id, "version": args.version, "commit": sha, **info}))
+        if not args.keep:
+            shutil.rmtree(work, ignore_errors=True)
+        return 0
     env = dict(os.environ, ZRN_SOURCE_REPO=source, ZRN_SOURCE_COMMIT=sha)
     p = subprocess.run([sys.executable, str(SDK / "tools" / "zrn"), "pack", "--no-sign", "--bundle-zrnui", "--json",
                         "-C", str(app), "--out", str(out)], capture_output=True, text=True, env=env)
@@ -218,6 +225,79 @@ def cmd_build(args):
     if not args.keep:
         shutil.rmtree(work, ignore_errors=True)
     return 0
+
+
+# An SDK v2 app: a CMake project that builds one program, linking zrnui and zrnapp
+# statically from ZRN_SDK_DIR (as the SDK's examples and phone presets do).
+SERVICE_KEYS = ("name", "description", "args", "after", "env", "restart", "restart_sec",
+                "restart_prevent_exit_status", "umask", "nice", "memory_high")
+
+
+def v2_manifest(proj, arch, source=None, commit=None):
+    a, b = proj.get("app", {}), proj.get("build", {})
+    m = {"zexec": 2, "id": a.get("id"), "name": a.get("name"), "version": a.get("version"),
+         "summary": a.get("summary", ""), "description": a.get("description", ""),
+         "author": a.get("author", ""), "licence": a.get("licence", a.get("license", "")),
+         "homepage": a.get("homepage", ""), "arch": arch, "runtime": "native", "entry": f"bin/{a.get('id')}",
+         "zrnui": "2.0", "sdk": 2, "min_ztos": a.get("min_ztos", "0.2.1"),
+         "permissions": a.get("permissions", []), "categories": a.get("categories", []),
+         "data_dirs": a.get("data_dirs", []), "built": {"by": "ztOS store (cmake)", "lang": b.get("lang", "c")},
+         "services": [{k: v for k, v in svc.items() if k in SERVICE_KEYS} for svc in proj.get("service", [])]}
+    if a.get("icon"):
+        m["icon"] = "icon" + Path(a["icon"]).suffix
+    if source and commit:
+        m["source"] = {"repo": source, "commit": commit}
+    return m
+
+
+def build_v2(app, out, source, sha):
+    proj = tomllib.loads((app / "zrnapp.toml").read_text())
+    a, b = proj.get("app", {}), proj.get("build", {})
+    sdk = SDK2
+    if not (sdk / "zrnui" / "CMakeLists.txt").exists():
+        raise StoreError(f"no zrn-sdk v2 at {sdk}: set ZRN_SDK2 (sdk.lock commit_v2)")
+    bdir = app / "build" / "store"
+    arch = platform_arch()
+    cfg = ["cmake", "-S", str(app), "-B", str(bdir), "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release",
+           f"-DZRN_SDK_DIR={sdk}", "-DZRNUI_BUILD_SHARED=OFF", "-DZRNAPP_BUILD_SHARED=OFF",
+           "-DZRNUI_BUILD_TESTS=OFF", "-DZRNAPP_BUILD_TESTS=OFF",
+           # the same commit gives the same bytes wherever it is built
+           f"-DCMAKE_C_FLAGS=-ffile-prefix-map={app}=. -ffile-prefix-map={sdk}=zrn-sdk",
+           f"-DCMAKE_CXX_FLAGS=-ffile-prefix-map={app}=. -ffile-prefix-map={sdk}=zrn-sdk"]
+    for cmd, what in ((cfg, "cmake configure"), (["cmake", "--build", str(bdir)], "cmake build")):
+        p = subprocess.run(cmd, capture_output=True, text=True)
+        if p.returncode:
+            raise StoreError(f"{what} failed: {(p.stderr or p.stdout).strip()[-3000:]}")
+    target = b.get("target") or a.get("id")
+    binary = bdir / target
+    if not binary.is_file():
+        raise StoreError(f"the build made no {target} in {bdir} ([build] target names the program)")
+    subprocess.run(["strip", "--strip-debug", str(binary)], capture_output=True)
+    m = v2_manifest(proj, arch, source, sha)
+    files = {m["entry"]: (str(binary), 0o755)}
+    if m.get("icon"):
+        files[m["icon"]] = (str(app / a["icon"]), 0o644)
+    # zrnui's fonts and theme, as the SDK at sdk.lock has them (see README: why in every package)
+    for f in sorted((sdk / "zrnui" / "fonts").rglob("*")):
+        if f.is_file():
+            files[f"share/zrnui/fonts/{f.name}"] = (str(f), 0o644)
+    files["share/zrnui/theme/theme.ini"] = (str(sdk / "zrnui" / "theme" / "theme.ini"), 0o644)
+    for pat in b.get("data", []):
+        for f in sorted(app.glob(pat)):
+            if f.is_file():
+                files["share/" + str(f.relative_to(app))] = (str(f), 0o644)
+    path = out / f"{m['id']}-{m['version']}-{arch}.zexec"
+    digest = zexec.pack(str(path), m, files)
+    _, problems = zexec.check(str(path))
+    if problems:
+        raise StoreError(f"the package is not valid: {'; '.join(problems)}")
+    return {"package": str(path), "sha256": digest, "arch": arch, "format": 2}
+
+
+def platform_arch():
+    import platform
+    mach = platform.machine()
+    return {"arm64": "aarch64", "amd64": "x86_64"}.get(mach, mach)
 
 
 # ---------------------------------------------------------------- publish ---
@@ -318,6 +398,8 @@ def cmd_index(args):
                     "version": r["version"], "arch": meta["arch"], "sha256": meta["sha256"], "size": meta["size"],
                     "url": f"{base}/{meta['tag']}/{meta['file']}", "sig_url": f"{base}/{meta['tag']}/{meta['file']}.minisig",
                     "zrnui": m.get("zrnui"), "min_ztos": m.get("min_ztos"), "permissions": m.get("permissions", []),
+                    "zexec": m.get("zexec", 1),
+                    "services": [svc.get("name") for svc in m.get("services", [])],
                     "commit": r["commit"], "approved_by": r["approved_by"], "approved_at": r["approved_at"],
                 })
         if not releases:

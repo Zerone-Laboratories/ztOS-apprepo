@@ -11,8 +11,7 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SDK = Path(os.environ.get("ZRN_SDK") or HERE.parents[1] / "zrn-sdk")
-sys.path.insert(0, str(SDK / "tools"))
+sys.path.insert(0, str(HERE.parent / "client"))
 from zrnlib import sign, zexec  # noqa: E402
 
 SHA = "1" * 40
@@ -40,7 +39,7 @@ class Store(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.d = Path(self.tmp.name)
         (self.d / "ledger").mkdir()
-        self.env = dict(os.environ, STORE_LEDGER=str(self.d / "ledger"), ZRN_SDK=str(SDK))
+        self.env = dict(os.environ, STORE_LEDGER=str(self.d / "ledger"))
         self.key = sign.SecretKey.generate()
         (self.d / "store.key").write_text(self.key.dumps())
         (self.d / "store.pub").write_text(self.key.public.dumps())
@@ -53,13 +52,20 @@ class Store(unittest.TestCase):
                            env=self.env)
         return p.returncode, p.stdout, p.stderr
 
-    def artifact(self, commit=SHA, version="1.0.0", name="a"):
+    def artifact(self, commit=SHA, version="1.0.0", name="a", v2=False, services=()):
         m = {"zexec": 1, "id": "io.github.alice.notes", "name": "Notes", "version": version, "arch": "any",
              "runtime": "python3", "entry": "app/main.py", "zrnui": "0.1",
              "source": {"repo": REPO, "commit": commit}}
+        files = {"app/main.py": (b"print('hi')\n", 0o644)}
+        if v2:
+            # an aarch64 ELF header is all check() reads of the program
+            elf = b"\x7fELF\x02\x01\x01" + b"\0" * 11 + (183).to_bytes(2, "little") + b"\0" * 44
+            m.update(zexec=2, arch="aarch64", runtime="native", entry="bin/io.github.alice.notes", zrnui="2.0",
+                     permissions=["background"], services=list(services))
+            files = {m["entry"]: (elf, 0o755), "share/zrnui/theme/theme.ini": (b"[dark]\n", 0o644)}
         out = self.d / "artifacts" / name
         out.mkdir(parents=True, exist_ok=True)
-        zexec.pack(str(out / f"notes-{version}.zexec"), m, {"app/main.py": (b"print('hi')\n", 0o644)})
+        zexec.pack(str(out / f"notes-{version}.zexec"), m, files)
 
     def publish_and_index(self):
         code, out, perr = self.store("publish", "--artifacts", str(self.d / "artifacts"), "--index-tree",
@@ -131,6 +137,49 @@ class Store(unittest.TestCase):
         self.assertEqual(json.loads(out), [])
         code, out, _ = self.store("--staging", "plan", "--index-tree", str(self.d / "tree"))
         self.assertEqual(len(json.loads(out)), 1)
+
+
+    def test_format2_published_with_services(self):
+        (self.d / "ledger" / "io.github.alice.notes.toml").write_text(ledger())
+        self.artifact(v2=True, services=[{"name": "io.github.alice.notes-sync", "args": ["--sync"]}])
+        index, err = self.publish_and_index()
+        rel = index["apps"][0]["releases"][0]
+        self.assertEqual((rel["zexec"], rel["arch"], rel["services"]), (2, "aarch64", ["io.github.alice.notes-sync"]))
+        self.assertEqual(index["format"], 1)       # older phones still read the index
+        code, out, _ = self.store("check-index", "--index", str(self.d / "tree" / "index.json"),
+                                  "--pubkey", str(self.d / "store.pub"))
+        self.assertEqual(code, 0, out)
+
+    def test_format2_rules(self):
+        base = {"zexec": 2, "id": "io.github.alice.notes", "name": "N", "version": "1.0.0", "arch": "aarch64",
+                "runtime": "native", "entry": "bin/x", "zrnui": "2.0", "permissions": ["background"]}
+        ok = dict(base, services=[{"name": "io.github.alice.notes-a"},
+                                  {"name": "io.github.alice.notes-b", "after": ["io.github.alice.notes-a"],
+                                   "env": {"UI": "{exec}"}}])
+        self.assertEqual(zexec.validate_manifest(ok), [])
+        for bad, why in ((dict(base, services=[{"name": "dbus"}]), "start with it"),
+                         (dict(base, services=[{"name": "zrn-x"}]), "start with it"),   # zrn- only for zrn- apps
+                         (dict(base, permissions=[], services=[{"name": "io.github.alice.notes"}]), "background"),
+                         (dict(base, services=[{"name": "io.github.alice.notes", "args": ["a\nExecStartPre=x"]}]),
+                          "args"),
+                         (dict(base, services=[{"name": "io.github.alice.notes", "after": ["sshd"]}]), "after"),
+                         (dict(base, zrnui="0.1"), "zrnui 2.x"),
+                         (dict(base, zexec=3), "reads formats")):
+            self.assertTrue(any(why in p for p in zexec.validate_manifest(bad)), (bad, why))
+        zrn = dict(base, id="zrn-whatsapp", services=[{"name": "zrn-ztwhatsappd"}])
+        self.assertEqual(zexec.validate_manifest(zrn), [])
+
+    def test_v2_manifest_from_zrnapp_toml(self):
+        import tomllib
+        sys.path.insert(0, str(HERE))
+        import store
+        proj = tomllib.loads((HERE.parents[1] / "zrn-whatsapp" / "zrnapp.toml").read_text()) \
+            if (HERE.parents[1] / "zrn-whatsapp" / "zrnapp.toml").exists() else None
+        if not proj:
+            self.skipTest("no zrn-whatsapp checkout next to this one")
+        m = store.v2_manifest(proj, "aarch64", REPO, SHA)
+        self.assertEqual(zexec.validate_manifest(m), [])
+        self.assertEqual([s["name"] for s in m["services"]], ["zrn-ztwhatsappd", "zrn-ztwhatsapp-notify"])
 
 
 if __name__ == "__main__":
