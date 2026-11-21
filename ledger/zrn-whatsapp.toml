@@ -7,6 +7,10 @@ subdir = ""
 name = "WhatsApp"
 author = "Zerone Laboratories"
 contact = "ztOS Mobile Discord"
+# From 0.3.0 the app is SDK v2 (.zexec format 2, [build] sdk = 2) with two login
+# services (zrn-ztwhatsappd, zrn-ztwhatsapp-notify). Its [[release]] is added here by
+# the bot when a moderator accepts it, as for every release; phones need the client
+# from client/ (zrn 0.3.0) to install it.
 
 [[release]]
 version = "0.1.0"

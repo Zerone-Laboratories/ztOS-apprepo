@@ -4,8 +4,9 @@
 #
 #   plan     approved releases in ledger/ with nothing published yet
 #   build    one job per release, on arm64 (the phone's CPU), inside Arch Linux ARM
-#            with the image's packages: fetches the app at its pinned SHA, runs
-#            `zrn pack --no-sign`, and fails if it links what the image lacks. It runs the app's own
+#            with the image's packages: fetches the app at its pinned SHA, builds it with
+#            the SDK sdk.lock pins for it (v1: `zrn pack --no-sign`; v2: CMake, packed as
+#            .zexec format 2), and fails if it links what the image lacks. It runs the app's own
 #            build, so it gets NO secrets and a read-only token it does not keep.
 #   publish  the only job with the store key (environment "store-signing"): checks
 #            each package against the ledger, signs it, makes the release, and
@@ -56,12 +57,6 @@ jobs:
           ref: store-index
           path: index
           persist-credentials: false
-      - name: zrn-sdk at sdk.lock
-        run: |
-          repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)
-          commit=$(sed -n 's/^commit = "\([0-9a-f]\{40\}\)"/\1/p' sdk.lock)
-          git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
-          echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
       - id: plan
         env:
           T_ID: ${{ inputs.trial_id }}
@@ -136,13 +131,8 @@ jobs:
         run: |
           if git fetch -q origin store-index; then git worktree add -q index FETCH_HEAD
           else git worktree add -q --detach index && git -C index checkout -q --orphan store-index && git -C index rm -rq . || true; fi
-      - name: zrn-sdk at sdk.lock (its Python tools only; nothing is built here)
-        run: |
-          repo=$(sed -n 's/^repo = "\(.*\)"/\1/p' sdk.lock)
-          commit=$(sed -n 's/^commit = "\([0-9a-f]\{40\}\)"/\1/p' sdk.lock)
-          git init -q sdk && git -C sdk fetch -q --depth 1 "$repo" "$commit" && git -C sdk checkout -q --detach FETCH_HEAD
-          echo "ZRN_SDK=$PWD/sdk" >> "$GITHUB_ENV"
-          pip install cryptography
+      - name: Python for the store's tools (client/zrnlib, the format and signatures)
+        run: pip install cryptography
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: artifacts

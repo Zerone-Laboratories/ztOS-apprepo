@@ -7,7 +7,8 @@ a binary, and nobody merges a pull request to add your app.
 
 ## Before you submit
 
-1. Your app builds and packs with the SDK: `zrn build && zrn pack && zrn verify dist/*.zexec`.
+1. Your app builds and packs with the SDK: `zrn build && zrn pack && zrn verify dist/*.zexec`
+   (SDK v1), or builds with CMake (SDK v2, see below).
 2. It looks right in both of ztCoolStyle's styles, Metro and DotMatrix:
    `zrn render --style metro out.png` and `zrn render --style dotmatrix out.png`.
 3. `zrnapp.toml` is complete:
@@ -27,6 +28,26 @@ a binary, and nobody merges a pull request to add your app.
    package registry (Rust crates).
 5. The licence lets the store redistribute your app. libzrnui and its bindings
    are LGPL-2.1-or-later, so an app under any licence can link them.
+
+## SDK v2 apps
+
+An app made with SDK v2 (zrnui and zrnapp, CMake) says so in `zrnapp.toml`:
+
+```toml
+[build]
+sdk = 2
+target = "notes"        # the program CMakeLists.txt builds (default: the app id)
+```
+
+The store configures your `CMakeLists.txt` with `-DZRN_SDK_DIR=<zrn-sdk at the
+store's pinned commit>` and `-DZRNUI_BUILD_SHARED=OFF -DZRNAPP_BUILD_SHARED=OFF`,
+so pull the SDK in with `add_subdirectory(${ZRN_SDK_DIR}/zrnapp ...)` as the
+SDK's examples do, and link nothing else from it. It packs the program, your
+icon, `[build] data` files and zrnui's fonts and theme. Services that run at
+login (a sync engine, a notifier) are declared with `[[service]]` (see the
+README); they need the `background` permission, and moderators read them like
+permissions. Never write systemd units yourself: the store's client does, and
+removes them with the app.
 
 ## Submitting
 
